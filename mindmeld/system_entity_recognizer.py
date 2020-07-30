@@ -469,19 +469,15 @@ class DucklingRecognizer(SystemEntityRecognizer):
         # c) candidate whose span matches either the start or end user annotation
         # span
 
-        for raw_candidate in duckling_candidates:
+        # only take the smallest grain
+        for raw_candidate in [duckling_candidates[-1]]:
             candidate = duckling_item_to_query_entity(
                 query, raw_candidate, offset=span.start
             )
 
-            if candidate.entity.type == entity_type:
-                # If the candidate matches the entire entity, return it
-                if candidate.span == span:
-                    return candidate
-                else:
-                    duckling_text_val_to_candidate.setdefault(
-                        candidate.text, []
-                    ).append(candidate)
+            # force match the entity type but take the same value.
+            candidate.entity.type = entity_type
+            return candidate
 
         # Sort duckling matching candidates by the length of the value
         best_duckling_candidate_names = list(duckling_text_val_to_candidate.keys())
